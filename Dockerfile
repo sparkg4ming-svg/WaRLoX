@@ -1,6 +1,6 @@
 # ============================================================
-#  JinX X4G  |  3X-UI v2.9.4 for Railway
-#  In partnership with X4G
+#  CraZy CRZ  |  3X-UI v2.9.4 for Railway
+#  In partnership with CRZ
 # ============================================================
 FROM ghcr.io/mhsanaei/3x-ui:v2.9.4
 
@@ -36,34 +36,34 @@ RUN set -eux; \
     ln -sf /usr/share/zoneinfo/Asia/Tehran /etc/localtime; echo "Asia/Tehran" > /etc/timezone; \
     test -x /app/x-ui
 
-# 2) JinX files (everything sits next to this Dockerfile)
-COPY *.py init.sh nginx.conf.tpl sub.html jx-check.html lock.js /opt/jinx/
+# 2) CraZy files (everything sits next to this Dockerfile)
+COPY *.py init.sh nginx.conf.tpl sub.html jx-check.html lock.js /opt/CraZy/
 
 # 3) services: init -> x-ui, nginx, helper -> guardian (built here, nothing else to upload)
 RUN set -eux; \
-    find /opt/jinx -type f \( -name '*.sh' -o -name '*.py' -o -name '*.tpl' -o -name '*.js' -o -name '*.html' \) -exec sed -i 's/\r$//' {} +; \
-    mkdir -p /opt/jinx/segno; \
+    find /opt/CraZy -type f \( -name '*.sh' -o -name '*.py' -o -name '*.tpl' -o -name '*.js' -o -name '*.html' \) -exec sed -i 's/\r$//' {} +; \
+    mkdir -p /opt/CraZy/segno; \
     for m in init consts encoder helpers utils writers; do \
         t="$m.py"; [ "$m" = init ] && t="__init__.py"; \
-        mv "/opt/jinx/segno-$m.py" "/opt/jinx/segno/$t"; \
+        mv "/opt/CraZy/segno-$m.py" "/opt/CraZy/segno/$t"; \
     done; \
-    chmod 755 /opt/jinx/*.sh /opt/jinx/*.py; \
+    chmod 755 /opt/CraZy/*.sh /opt/CraZy/*.py; \
     D=/etc/s6-overlay/s6-rc.d; \
     mkdir -p "$D/user/contents.d"; \
     for s in jx-init x-ui nginx jx-helper jx-guard; do \
         mkdir -p "$D/$s/dependencies.d"; touch "$D/$s/dependencies.d/base" "$D/user/contents.d/$s"; \
     done; \
     echo oneshot > "$D/jx-init/type"; \
-    echo "/command/with-contenv /opt/jinx/init.sh" > "$D/jx-init/up"; \
+    echo "/command/with-contenv /opt/CraZy/init.sh" > "$D/jx-init/up"; \
     for s in x-ui nginx jx-helper jx-guard; do echo longrun > "$D/$s/type"; touch "$D/$s/dependencies.d/jx-init"; done; \
     touch "$D/jx-guard/dependencies.d/x-ui" "$D/jx-guard/dependencies.d/nginx"; \
     printf '#!/command/with-contenv sh\nulimit -n "$(ulimit -Hn 2>/dev/null || echo 65535)" 2>/dev/null || true\ncd /app || exit 1\nexec /app/x-ui 2>&1\n' > "$D/x-ui/run"; \
-    printf '#!/command/with-contenv sh\nulimit -n "$(ulimit -Hn 2>/dev/null || echo 65535)" 2>/dev/null || true\nexec nginx -c /run/jinx/nginx.conf -g "daemon off;" 2>&1\n' > "$D/nginx/run"; \
-    printf '#!/command/with-contenv sh\nexec python3 /opt/jinx/helper.py 2>&1\n' > "$D/jx-helper/run"; \
-    printf '#!/command/with-contenv sh\nexec python3 /opt/jinx/guard.py 2>&1\n' > "$D/jx-guard/run"; \
+    printf '#!/command/with-contenv sh\nulimit -n "$(ulimit -Hn 2>/dev/null || echo 65535)" 2>/dev/null || true\nexec nginx -c /run/CraZy/nginx.conf -g "daemon off;" 2>&1\n' > "$D/nginx/run"; \
+    printf '#!/command/with-contenv sh\nexec python3 /opt/CraZy/helper.py 2>&1\n' > "$D/jx-helper/run"; \
+    printf '#!/command/with-contenv sh\nexec python3 /opt/CraZy/guard.py 2>&1\n' > "$D/jx-guard/run"; \
     chmod 755 "$D"/*/run; \
-    python3 -m py_compile /opt/jinx/*.py; rm -rf /opt/jinx/__pycache__; \
-    python3 -c "import sys; sys.path.insert(0,'/opt/jinx'); import segno"; \
+    python3 -m py_compile /opt/CraZy/*.py; rm -rf /opt/CraZy/__pycache__; \
+    python3 -c "import sys; sys.path.insert(0,'/opt/CraZy'); import segno"; \
     nginx -v
 
 EXPOSE 8080
